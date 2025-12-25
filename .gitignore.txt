@@ -1,0 +1,18 @@
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Node.js dependencies
+node_modules/
+dist/
+
+# Temporary files (our PDF/EPUB logs)
+temp_*
+incoming_*
+*.epub
+*.pdf
+
+# OS specific
+.DS_Store
+Thumbs.db

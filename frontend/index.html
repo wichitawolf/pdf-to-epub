@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reflowable.me — PDF → EPUB</title>
+  <style>
+    :root{
+      --bg: #edf6f9;
+      --accent: #83c5be;
+      --primary: #006d77;
+      --glass: rgba(255,255,255,0.85);
+      --radius: 18px;
+      --muted: #044948;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(0,109,119,0.04), transparent 10%),
+                  linear-gradient(180deg, var(--bg) 0%, #ffffff 70%);
+      color: var(--muted);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:64px 32px;
+      box-sizing:border-box;
+    }
+
+    .card{
+      width:100%;
+      max-width:1500px;
+      background: var(--glass);
+      border-radius: var(--radius);
+      padding:48px 56px;
+      box-shadow: 0 30px 60px rgba(2, 48, 52, 0.12);
+      display:flex;
+      gap:40px;
+      align-items:center;
+      transform:translateY(0);
+    }
+
+    .brand{
+      flex:0 0 380px;
+      text-align:left;
+      padding:12px 18px;
+    }
+
+    .brand h1{
+      margin:0 0 8px;
+      font-size:62px;
+      line-height:1;
+      letter-spacing:-1px;
+      color: var(--primary);
+      font-weight:700;
+    }
+
+    .brand p{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size:20px;
+      opacity:0.95;
+    }
+
+    .brand .tag{
+      margin-top:18px;
+      display:inline-block;
+      background: linear-gradient(90deg,var(--accent), rgba(0,109,119,0.12));
+      color: #00383a;
+      padding:10px 14px;
+      border-radius:12px;
+      font-weight:600;
+      font-size:15px;
+      box-shadow: 0 8px 20px rgba(131,197,190,0.08);
+    }
+
+    .controls{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+    }
+
+    .drop{
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(131,197,190,0.06), rgba(0,109,119,0.02));
+      padding:28px;
+      display:flex;
+      gap:20px;
+      align-items:center;
+      justify-content:space-between;
+      border: 2px dashed rgba(0,109,119,0.12);
+      min-height:120px;
+    }
+
+    .file-meta{
+      display:flex;
+      gap:18px;
+      align-items:center;
+      min-width:0;
+    }
+
+    .file-name{
+      font-size:22px;
+      color: var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:560px;
+    }
+
+    .drop .hint{
+      font-size:16px;
+      color: rgba(3,58,58,0.9);
+    }
+
+    /* Hidden real input */
+    input[type="file"]{
+      display:none;
+    }
+
+    .btn{
+      background: linear-gradient(180deg,var(--primary), #034f53);
+      color: #fff;
+      border: none;
+      padding:16px 28px;
+      border-radius:12px;
+      font-size:20px;
+      cursor:pointer;
+      box-shadow: 0 10px 26px rgba(0,109,119,0.16);
+      transition: transform .08s ease, box-shadow .12s ease, opacity .12s;
+      font-weight:700;
+    }
+    .btn:hover{ box-shadow: 0 14px 34px rgba(0,109,119,0.18); transform: translateY(-1px); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.secondary{
+      background: linear-gradient(180deg,var(--accent), #5aaea2);
+      color:#00383a;
+      box-shadow: 0 8px 22px rgba(131,197,190,0.12);
+    }
+
+    .large{
+      font-size:20px;
+      padding:18px 28px;
+      border-radius:12px;
+    }
+
+    .small-note{
+      font-size:15px;
+      color: rgba(5,75,73,0.95);
+      opacity:0.95;
+    }
+
+    footer{
+      margin-top:12px;
+      font-size:14px;
+      color:rgba(5,75,73,0.9);
+      opacity:0.95;
+      text-align:center;
+    }
+
+    /* mobile adjustments */
+    @media (max-width:980px){
+      .card{ flex-direction:column; padding:28px; gap:18px; max-width:760px; }
+      .brand{ order:0; flex:unset; text-align:center; }
+      .brand h1{ font-size:44px; }
+      .file-name{ max-width:320px; font-size:18px; }
+      .drop{ min-height:110px; padding:20px; }
+      .btn{ font-size:18px; padding:14px 20px; }
+    }
+
+    @media (max-width:520px){
+      .brand h1{ font-size:34px; }
+      .card{ padding:20px; }
+      .drop{ flex-direction:column; align-items:stretch; gap:12px; }
+      .file-meta{ justify-content:center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main" aria-labelledby="title">
+      <div class="brand">
+        <h1 id="title">Reflowable.me</h1>
+        <p>Fast, clean PDF → Reflowable EPUB conversion</p>
+        <div class="tag">Readable reflowable ebooks • Accessible output</div>
+      </div>
+
+      <form id="convForm" class="controls" autocomplete="off">
+        <div class="drop" id="dropZone" aria-label="Upload PDF">
+          <div class="file-meta" style="flex:1;min-width:0">
+            <label for="fileInput" class="btn secondary large" id="chooseBtn">Choose PDF</label>
+            <div style="display:flex;flex-direction:column;justify-content:center;min-width:0">
+              <div class="file-name" id="fileName">No file selected</div>
+              <div class="hint" style="margin-top:6px;color:rgba(3,58,58,0.6)">Or drag & drop a PDF onto this area</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:14px;align-items:center">
+            <button type="submit" class="btn large" id="convertBtn">Convert</button>
+          </div>
+        </div>
+
+        <input id="fileInput" name="file" type="file" accept="application/pdf" />
+
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="small-note">Recommended: single-column PDFs for best results.</div>
+          <div id="status" class="small-note"></div>
+        </div>
+
+        <footer>© 2025 Reflowable.me — Fast PDF to EPUB Conversion</footer>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
+    const convForm = document.getElementById('convForm');
+    const status = document.getElementById('status');
+    const chooseBtn = document.getElementById('chooseBtn');
+    const dropZone = document.getElementById('dropZone');
+
+    chooseBtn.addEventListener('click', ()=> fileInput.click());
+    fileInput.addEventListener('change', e=>{
+      const f = e.target.files[0];
+      fileName.textContent = f ? f.name : 'No file selected';
+      status.textContent = '';
+    });
+
+    // drag & drop
+    dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.style.borderColor = 'rgba(0,109,119,0.6)'; dropZone.style.boxShadow = '0 12px 28px rgba(0,109,119,0.06)'; });
+    dropZone.addEventListener('dragleave', e=>{ dropZone.style.borderColor = 'rgba(0,109,119,0.12)'; dropZone.style.boxShadow = 'none'; });
+    dropZone.addEventListener('drop', e=>{
+      e.preventDefault();
+      dropZone.style.borderColor = 'rgba(0,109,119,0.12)';
+      dropZone.style.boxShadow = 'none';
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if(f && (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'))){
+        fileInput.files = e.dataTransfer.files;
+        fileName.textContent = f.name;
+        status.textContent='';
+      } else status.textContent = 'Please drop a PDF file.';
+    });
+
+    function getFilenameFromDisposition(disposition){
+      if(!disposition) return null;
+      const match = /filename\*=UTF-8''([^;]+)|filename="([^"]+)"/i.exec(disposition);
+      return match ? decodeURIComponent(match[1] || match[2]) : null;
+    }
+
+    convForm.addEventListener('submit', async (ev)=>{
+      ev.preventDefault();
+      const file = fileInput.files[0];
+      if(!file){ status.textContent = 'Please choose a PDF first.'; return; }
+
+      status.textContent = 'Uploading...';
+      const fd = new FormData();
+      fd.append('file', file, file.name);
+
+      try{
+        const resp = await fetch('/convert', { method:'POST', body: fd });
+        if(!resp.ok){
+          let txt;
+          try{ txt = await resp.json(); } catch(e){ txt = await resp.text(); }
+          status.textContent = 'Error: ' + (txt.detail || txt.error || JSON.stringify(txt));
+          return;
+        }
+
+        status.textContent = 'Preparing download...';
+        const blob = await resp.blob();
+        const disp = resp.headers.get('Content-Disposition');
+        const fname = getFilenameFromDisposition(disp) || (file.name.replace(/\.pdf$/i,'.epub'));
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = 'Done';
+      }catch(err){
+        status.textContent = 'Network error';
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
